@@ -11,4 +11,4 @@ def fib(n):
 
 num = int(input())
 res = fib(num - 1)
-print('n-ое число фббфбфб:', res)
+print(num, '-ое число Фибоначчи:', res)
