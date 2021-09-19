@@ -2,10 +2,10 @@ import argparse
 
 
 def func(number, a):
-    b = number
+    res = number
     while True:
-        b = b * a
-        yield number
+        yield res
+        res = res * a
 
 
 parser = argparse.ArgumentParser()
