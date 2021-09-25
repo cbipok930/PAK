@@ -47,16 +47,24 @@ def line_parse(line):
         Matrix's row
     """
     res = []
+    sign = 1
     while len(line) > 0:
-        num = line[0]
+        char = line[0]
         line = line[1:]
-        if num.isnumeric():
-            res.append(num)
-        elif num == '-':
-            num = line[0]
+        if char.isnumeric():
+            num = int(char)
+            char = line[0]
             line = line[1:]
-            num = int(num) * -1
-            res.append(num)
+            while char.isnumeric():
+                num = num * 10 + int(char)
+                char = line[0]
+                line = line[1:]
+                if len(line) == 0:
+                    break
+            res.append(num * sign)
+            sign = 1
+        elif char == '-':
+            sign = -1
     return res
 
 
@@ -76,14 +84,14 @@ def mult_matrices(matrix1, matrix2):
     """
     n = len(matrix1)
     m = len(matrix2[0])
-    l = len(matrix2)
+    ll = len(matrix2)
     matrix_r = []
     for i in range(n):
         row = []
         for j in range(m):
             c = 0
-            for k in range(l):
-                c += int((matrix1[i])[k]) * int((matrix2[k])[j])
+            for k in range(ll):
+                c += matrix1[i][k] * matrix2[k][j]
             row.append(c)
         matrix_r.append(row)
     return matrix_r
@@ -150,7 +158,7 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("i_path", type=str, help='Путь к файлу с матрицами')
-    parser.add_argument("o_path", type=str, help='Путь к файлу с результирующей матрице')
+    parser.add_argument("o_path", type=str, help='Путь к файлу с результирующей матрицей')
     args = parser.parse_args()
     input_p = os.path.abspath(args.i_path)
     output_p = os.path.abspath(args.o_path)
