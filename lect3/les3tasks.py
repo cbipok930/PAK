@@ -1,3 +1,6 @@
+import copy
+
+
 class Item:
     def __init__(self, count=3, max_count=10):
         self._count = count
@@ -169,21 +172,76 @@ class Inventory:
     def __len__(self):
         return len(self._list)
 
-    def __getitem__(self, item):
-        if item > len(self) - 1:
-            print("Index out of list")
-        return self._list[item]
-
-    def __setitem__(self, key, value):
+    # def __getitem__(self, item):
+    #     if item > len(self) - 1:
+    #         print("Index out of list")
+    #     return self._list[item]
+    def getitem_copy(self, key):
         if key > len(self) - 1:
             print("Index out of list")
-        self._list[key] = value
+        object_ = copy.copy(self._list[key])
+        return object_
+
+    def setitem(self, key, value):
+        key = int(key)
+        if key > len(self) - 1:
+            print("Index out of list")
+            return self
+        if isinstance(value, Item):
+            if value.count == 0:
+                self._list[key] = None
+                return self
+            else:
+                object_ = copy.copy(value)
+                self._list[key] = object_
+                return self
+        print("Object should be Item")
         return self
 
+    def remove_from_inventory(self, key):
+        if key > len(self) - 1:
+            print("Index out of list")
+            return self
+        self._list[key] = None
 
-myrice = Rice(False, handful=2)
-if myrice.eatable:
-    myrice.update_count(5)
-    myrice.cook()
-myinvent = Inventory()
-myinvent[0] = myrice
+
+class Query:
+    def __init__(self, cap=10):
+        self._cap = cap
+        self.__content = []
+        for i in range(cap):
+            self.__content.append(None)
+        self._begin = 0
+        self._end = 0
+        self._cnt = 0
+
+    def push(self, value):
+        if self._cnt == self._cap:
+            print("query is full")
+            return self
+        self.__content[self._end] = value
+        self._end = (self._end + 1) % self._cap
+        self._cnt += 1
+        return self
+
+    def pop(self):
+        if self._cnt == 0:
+            print("query is empty")
+            return None
+        value = self.__content[self._begin]
+        self.__content[self._begin] = None
+        self._begin = (self._begin + 1) % self._cap
+        self._cnt -= 1
+        return value
+
+    def get_content(self):
+        export_content = []
+        for i in range(self._cap):
+            export_content.append(self.__content[i])
+        return export_content
+
+
+
+
+
+
