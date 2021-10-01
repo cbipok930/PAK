@@ -21,10 +21,14 @@ class Accountant:
         if isinstance(worker, Datascientist):
             workers_list = self._workers_transaction.keys()
             if worker in workers_list:
-                self._workers_transaction.update({worker: amount})
-                worker.take_salary(amount, self)
-                print(f"{self._name} подтверждает, что {worker.name} получил ${amount}")
-                return True
+                if worker.award:
+                    self._workers_transaction.update({worker: amount})
+                    if worker.take_salary(self, amount):
+                        print(f"{self._name} подтверждает, что {worker.name} получил ${amount}")
+                        return True
+                    return False
+                print(f"{self._name} запрещает перечисление работнику {worker.name} ${amount}")
+                return False
         print(f"{self._name} не знает {worker}")
         return False
 
@@ -45,8 +49,6 @@ class Accountant:
         print(f"{self._name} не знает {worker}")
         return False
 
-    ##def __check_transaction(self):
-
     @property
     def name(self):
         return self._name
@@ -55,7 +57,7 @@ class Accountant:
     def workers(self):
         workers = list(self._workers_transaction.keys())
         for i in range(len(workers)):
-            workers[i] = workers[i].name
+            workers[i] = (workers[i]).name
         return workers
 
 
@@ -64,6 +66,7 @@ class Datascientist:
         self.__name = name
         self.__money = money
         self.__work = work
+        self.__award = False
         self.__dict = {'что-то делать': None,
                        'суммировать матрицы': ('сложить', lambda x, y: x + y),
                        'вычетать матрицы': ('вычесть', lambda x, y: x - y)}
@@ -84,6 +87,7 @@ class Datascientist:
                 row.append((self.__dict.get(self.__work))[1](matrix1[i][j], matrix2[i][j]))
             matrix_res.append(row)
         mymatrices.matrix_out(matrix_res)
+        self.__award = True
         return True
 
     def take_salary(self, acc, amount):
@@ -91,6 +95,7 @@ class Datascientist:
             if acc(self, amount):
                 self.__money += amount
                 print(f"{self.__name} получил ${amount}")
+                self.__award = False
                 return True
             print(f"{self.__name} не получил ${amount}")
             return False
@@ -104,6 +109,10 @@ class Datascientist:
     @property
     def wallet(self):
         return self.__money
+
+    @property
+    def award(self):
+        return self.__award
 
 
 class Pupa(Datascientist):
