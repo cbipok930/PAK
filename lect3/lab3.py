@@ -1,4 +1,4 @@
-import mymatrices
+import lect3.mymatrices as mymatrices
 
 
 class Accountant:
