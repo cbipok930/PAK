@@ -32,7 +32,7 @@ class Accountant:
         print(f"{self._name} не знает {worker}")
         return False
 
-    def __call__(self, worker, amount):
+    def check_transaction(self, worker, amount):
         if isinstance(worker, Datascientist):
             workers_list = self._workers_transaction.keys()
             if worker in workers_list:
@@ -92,7 +92,7 @@ class Datascientist:
 
     def take_salary(self, acc, amount):
         if isinstance(acc, Accountant):
-            if acc(self, amount):
+            if acc.check_transaction(self, amount):
                 self.__money += amount
                 print(f"{self.__name} получил ${amount}")
                 self.__award = False
