@@ -5,6 +5,7 @@ import time
 
 
 def read(path):
+    """
     with open(path) as f:
         line = f.readline()
         lst = []
@@ -18,6 +19,9 @@ def read(path):
                 lst.pop(len(lst) - 1)
             line = f.readline()
         lst = list(map(lambda x: int(x) * flag, lst))
+    """
+    with open(path) as f:
+        lst = [[int(iii) for iii in line.strip().split()] for line in f]
     return lst
 
 
@@ -49,7 +53,7 @@ def m2(arr_size):
 def m3(arr_size):
     mask = np.random.rand(arr_size, )
     mask = mask > P
-    cond = [mask == True, mask == False]
+    cond = [mask, np.logical_not(mask)]
     res = [real, im]
     res = np.select(cond, res)
     return res
@@ -72,11 +76,15 @@ real_p = os.path.abspath(args.r_path)
 im_p = os.path.abspath(args.i_path)
 real = np.array(read(real_p))
 im = np.array(read(im_p))
+real = real.flatten()
+im = im.flatten()
 size = real.size
 if size != im.size:
     print('Массивы разных размеров')
     exit()
 print(ways.get(way)(size))
+
+
 print("Выполнить серию опытов? y/n")
 ans = input()
 if ans == 'y' or ans == 'Y':
