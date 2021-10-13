@@ -4,12 +4,18 @@ import pandas as pd
 
 def foo(s):
     if isinstance(s, pd.Series):
-        s = np.where(s, s > 0.3, 0)
-        s.sum()
-        s
+        cnt = s[s > 0.3].size
+        if cnt > 0:
+            the_sum = s[s > 0.3].aggregate(sum) / cnt
+        else:
+            return None
+        return the_sum
+    return False
+
 
 data = np.random.rand(10, 5)
 df = pd.DataFrame(data)
-a = df.apply(foo, axis=1)
+out = df.apply(foo, axis=1)
 print(df)
-print("g")
+print(out)
+
