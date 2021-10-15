@@ -16,6 +16,6 @@ def foo(s):
 data = np.random.rand(10, 5)
 df = pd.DataFrame(data)
 out = df.apply(foo, axis=1)
-print(df)
+print(df.head())
 print(out)
 
