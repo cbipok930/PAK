@@ -5,7 +5,7 @@ import shlex
 with open('titanic_with_labels.csv', encoding='utf-8') as data:
     df = data.read()
 df = df.replace('  ', ' NaN ')
-df = shlex.split(df, posix=False)
+df = shlex.split(df, posix=True)
 df = np.array(df[7:]).reshape((10000, 8))
 df = pd.DataFrame(df, columns=['none', 'sex', 'row_number', 'liters_drunk', 'age', 'drink', 'check_number', 'label'])
 df['row_number'] = df['row_number'].astype('float')
