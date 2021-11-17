@@ -4,22 +4,22 @@ import matplotlib.pyplot as plt
 import cv2.cv2 as cv2
 
 
-def find_and_mark(ghost, top, occult):
-    ghost = cv2.dilate(cv2.cornerHarris(ghost, 2, 3, 0.00001), None)
+def find_and_mark(ghost, top, occult, x, y):
     plt.imshow(ghost)
-    _, ghost = cv2.threshold(ghost, ghost.max() / 100, 255, cv2.THRESH_BINARY)
-    ghost = np.uint8(ghost)
-    plt.imshow(ghost)
-    sift = cv2.SIFT_create()
+    plt.show()
+    sift = cv2.ORB_create()
     keypoints_src, descriptors_src = sift.detectAndCompute(ghost, None)
     keypoints_dst, descriptors_dst = sift.detectAndCompute(occult, None)
-    bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=False)
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
     matches = bf.match(descriptors_src, descriptors_dst)
     matches = sorted(matches, key=lambda x: x.distance)
-    pt_src = np.float32([keypoints_src[m.queryIdx].pt for m in matches[:20]]).reshape(-1, 1, 2)
-    pt_dst = np.float32([keypoints_dst[m.trainIdx].pt for m in matches[:20]]).reshape(-1, 1, 2)
+    img3 = cv2.drawMatches(ghost, keypoints_src, occult, keypoints_dst, matches[:10], occult, flags=2)
+    plt.imshow(img3)
+    plt.show()
+    pt_src = np.float32([keypoints_src[m.queryIdx].pt for m in matches[:10]]).reshape(-1, 1, 2)
+    pt_dst = np.float32([keypoints_dst[m.trainIdx].pt for m in matches[:10]]).reshape(-1, 1, 2)
     h, status = cv2.findHomography(pt_src, pt_dst)
-    src_corners = np.array([[1, 1], [ghost.shape[1], ghost.shape[0]]]).reshape(-1, 1, 2).astype(np.float32)
+    src_corners = np.array([[1, 1], [x, y]]).reshape(-1, 1, 2).astype(np.float32)
     dst_corners = cv2.perspectiveTransform(src_corners, h).astype(int)
     cv2.rectangle(top, (dst_corners[0][0][0], dst_corners[0][0][1]),
                   (dst_corners[1][0][0], dst_corners[1][0][1]), (255, 0, 0), 4)
@@ -36,20 +36,23 @@ def main():
     pumpkin = cv2.imread('pumpkin_ghost.png')
     scary = cv2.imread('scary_ghost.png')
     picture_main = cv2.imread('lab7.png')
-    picture_main_back = np.float32(cv2.cvtColor(picture_main, cv2.COLOR_BGR2GRAY))
-    picture_main_back = cv2.dilate(cv2.cornerHarris(picture_main_back, 2, 3, 0.00001), None)
-    plt.imshow(picture_main_back)
-    _, picture_main_back = cv2.threshold(picture_main_back, picture_main_back.max() / 100, 255, cv2.THRESH_BINARY)
-    picture_main_back = np.uint8(picture_main_back)
-    plt.imshow(picture_main_back)
-    picture_main, picture_main_back = find_and_mark(cv2.cvtColor(candy, cv2.COLOR_BGR2GRAY),
-                                                    picture_main, picture_main_back)
-    picture_main, picture_main_back = find_and_mark(cv2.cvtColor(candy, cv2.COLOR_BGR2GRAY),
-                                                    picture_main, picture_main_back)
-    picture_main, picture_main_back = find_and_mark(cv2.cvtColor(scary, cv2.COLOR_BGR2GRAY),
-                                                    picture_main, picture_main_back)
-    picture_main, picture_main_back = find_and_mark(cv2.cvtColor(pumpkin, cv2.COLOR_BGR2GRAY),
-                                                    picture_main, picture_main_back)
+    picture_back = cv2.cvtColor(picture_main, cv2.COLOR_BGR2RGB)
+    plt.imshow(picture_back)
+    # _, picture_main_back = cv2.threshold(picture_back, picture_back.max() / 100, 255, cv2.THRESH_BINARY)
+    # picture_main_back = np.uint8(picture_main_back)
+    # plt.imshow(picture_main_back)
+    picture_main, picture_main_back = find_and_mark(cv2.cvtColor(candy, cv2.COLOR_BGR2RGB),
+                                                    picture_main, picture_back, candy.shape[1], candy.shape[0])
+    picture_main, picture_main_back = find_and_mark(cv2.cvtColor(candy, cv2.COLOR_BGR2RGB),
+                                                    picture_main, picture_back, candy.shape[1], candy.shape[0])
+    picture_main, picture_main_back = find_and_mark(cv2.cvtColor(scary, cv2.COLOR_BGR2RGB),
+                                                    picture_main, picture_back, scary.shape[1], scary.shape[0])
+    picture_main, picture_main_back = find_and_mark(cv2.cvtColor(pumpkin, cv2.COLOR_BGR2RGB),
+                                                    picture_main, picture_back, pumpkin.shape[1], pumpkin.shape[0])
+    picture_main, picture_main_back = find_and_mark(cv2.cvtColor(cv2.resize(scary, (0, 0), fx=0.45, fy=0.5), cv2.COLOR_BGR2RGB),
+                                                    picture_main, picture_back, scary.shape[1], scary.shape[0])
+    picture_main, picture_main_back = find_and_mark(cv2.cvtColor(cv2.resize(candy, (0, 0), fx=0.5, fy=0.5), cv2.COLOR_BGR2RGB),
+                                                    picture_main, picture_back, candy.shape[1], candy.shape[0])
     # picture_main, picture_main_back = find_and_mark(cv2.cvtColor(scary, cv2.COLOR_BGR2GRAY),
     #                                                 picture_main, picture_main_back)
     # find Harris corners
