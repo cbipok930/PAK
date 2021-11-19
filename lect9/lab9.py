@@ -4,7 +4,6 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
 
@@ -14,6 +13,14 @@ def decision_tree(x_train, y_train):
     model.fit(x_train, y_train)
     plt.figure(figsize=(16, 6))
     tree.plot_tree(model, feature_names=x_train.columns, filled=True)
+    plt.show()
+    importances = model.feature_importances_
+    features = x_train.columns
+    indices = np.argsort(importances)
+    plt.title('Важность признаков')
+    plt.barh(range(len(indices)), importances[indices], color='b', align='center')
+    plt.yticks(range(len(indices)), features[indices])
+    plt.xlabel('Относительная важность')
     plt.show()
     return model
 
@@ -30,6 +37,13 @@ def logical_regression(x_train, y_train):
     return model
 
 
+def tree_2(x_train, y_train):
+    x_train = x_train.drop(['sex', 'row_number', 'drink', 'check_number',
+                            'age_child', 'age_adult', 'age_old', 'liters_drunk', 'day'], axis=1)
+    model = decision_tree(x_train, y_train)
+    return model
+
+
 def predict_check(model, x_test, y_test):
     pred_y = model.predict(x_test)
     cmp = np.where(y_test == pred_y, 1, 0)
@@ -38,7 +52,6 @@ def predict_check(model, x_test, y_test):
 
 
 def main():
-    scaler = MinMaxScaler()
     df = pd.read_csv('titanic_prepared.csv')
     df = df.drop(columns=df.columns[0], axis=1)
     df['age_child'] = df['age_child'].astype(int)
@@ -62,7 +75,12 @@ def main():
     print(f"XGB accuracy: {accuracy_xgb}\n")
 
     accuracy_lr = predict_check(logical_regression(x_train, y_train), x_test, y_test)
-    print(f"Logical Regression accuracy: {accuracy_lr}")
+    print(f"Logical Regression accuracy: {accuracy_lr}\n")
+
+    x_test = x_test.drop(['sex', 'row_number', 'drink', 'check_number',
+                          'age_child', 'age_adult', 'age_old', 'liters_drunk', 'day'], axis=1)
+    accuracy_dt = predict_check(tree_2(x_train, y_train), x_test, y_test)
+    print(f"Decision Tree with 2 feathers accuracy: {accuracy_dt}\n")
 
     return True
 
