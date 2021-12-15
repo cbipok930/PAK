@@ -26,25 +26,28 @@ model = mobilenet_v2(num_classes=10)
 model.to(device)
 
 loss_function = CrossEntropyLoss()
-opt = Adam(model.parameters(), lr=0.01)
+optimazer = Adam(model.parameters(), lr=0.01)
 loss = None
 
 for epoch in range(1):
     sm = 0
-    for x, y in tqdm(train_set):
-        x = x.to(device=device, non_blocking=True)
-        y = y.to(device=device, non_blocking=True)
+    i = 1
+    for data, target in train_set:  # tqdm()
+        data = data.to(device=device, non_blocking=True)
+        target = target.to(device=device, non_blocking=True)
 
-        opt.zero_grad()
+        optimazer.zero_grad()
         model.zero_grad()
 
-        y_pred = model(x)
-        y_pred.requires_grad_()
-        loss = loss_function(y_pred, y)
+        model_out = model(data)
+        model_out.requires_grad_()
+        loss = loss_function(model_out, target)
         loss.backward()
         sm += loss.item()
-        opt.step()
-    print(sm / 1875)
+        optimazer.step()
+        print(i * len(data), len(train_set.dataset))
+        i += 1
+    print(sm / len(train_set))
 
 print("\n\n\n======================================", end="\n\n\n")
 
@@ -52,14 +55,14 @@ model.eval()
 test_loss, correct = 0, 0
 
 with torch.no_grad():
-    for x, y in test_set:
-        x = x.to(device=device, non_blocking=True)
-        y = y.to(device=device, non_blocking=True)
-        output = model(x)
-        test_loss += loss_function(output, y).item()
+    for data, target in test_set:
+        data = data.to(device=device, non_blocking=True)
+        target = target.to(device=device, non_blocking=True)
+        output = model(data)
+        test_loss += loss_function(output, target).item()
 
         pred = output.argmax(1, keepdim=True)
-        correct += pred.eq(y.view_as(pred)).sum().item()
+        correct += pred.eq(target.view_as(pred)).sum().item()
 
 test_loss /= len(test_set)
 acc = correct / (len(test_set) * 32)
